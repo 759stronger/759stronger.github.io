@@ -41,7 +41,7 @@
       <text x="373" y="355">定时事件</text>
     </g>
     <path d="M44 398 H676" stroke="#dedfe2" stroke-width="1"/>
-    <text x="44" y="420" fill="#747981" font-size="12">源码结构示意</text>
+    <text x="44" y="420" fill="#747981" font-size="12">事件驱动架构</text>
     <text x="676" y="420" fill="#2f5fae" font-size="12" text-anchor="end">LT 事件触发</text>
   </g>
 </svg>

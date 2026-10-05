@@ -1,12 +1,12 @@
-# 759stronger 个人作品集
+# 石连勇个人主页
 
-一个无需构建的静态作品集页面，用于介绍 Reactor、Qt 音乐播放器和 atrain CLI 三个项目。页面中的流程与结构示意用于说明项目，均不等同于可运行的在线演示；atrain CLI 源码正在整理中。
+石连勇的个人主页，介绍个人背景、AI 应用与 C++ 开发方向，以及 Reactor、Qt 音乐播放器和 atrain CLI 三个项目。网站采用静态 HTML 与 SVG，无需安装前端依赖。atrain CLI 处于开发阶段，源码整理中。
 
 在线地址：[https://759stronger.github.io](https://759stronger.github.io)。已于 2026-10-05 完成 GitHub Pages 部署与公网页面访问验收。默认分支为 `main`，发布源为根目录，后续网站提交由 Pages 自动部署。
 
 ## 文件
 
-- `index.html`：作品集首页，包含项目介绍与展示。
+- `index.html`：个人主页，包含个人介绍与项目展示。
 - `.nojekyll`：空文件，放在发布源根目录，关闭默认的 Jekyll 构建。
 - `README.md`：项目与部署说明。
 - `assets/`：项目结构示意图与站点图标，部署时保留目录结构。
@@ -24,6 +24,6 @@
 
 本页面不需要自定义构建流程或额外的 workflow 文件。分支发布由 GitHub 的 Pages 部署流程执行。部署方式依据：[创建 GitHub Pages 站点](https://docs.github.com/en/pages/getting-started-with-github-pages/creating-a-github-pages-site)与[配置发布源](https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site)。
 
-## 内容维护
+## 更新页面
 
-公开前确认项目描述与本人实际贡献一致，保留来源和已验证结果；不要将示意图或代码阅读结果表述为运行验收或性能测试。仅上传作品集所需文件，不上传本地项目全集、环境文件、访问令牌、密码或尚未授权公开的资料。姓名、邮箱、简历和新项目源码链接应在确认公开意愿及链接有效后再补充。
+个人介绍与项目内容位于 `index.html`，结构图和图标位于 `assets/`。保留资源目录结构，在本地预览后提交到 `main`，GitHub Pages 会自动发布更新。

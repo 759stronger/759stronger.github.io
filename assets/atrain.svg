@@ -45,7 +45,7 @@
     <rect x="503" y="246" width="75" height="22" rx="4" fill="#f8f7f3"/>
     <text x="540" y="262" fill="#747981" font-size="12" text-anchor="middle">继续推理</text>
     <path d="M44 398 H676" stroke="#dedfe2" stroke-width="1"/>
-    <text x="44" y="420" fill="#747981" font-size="12">源码流程示意</text>
-    <text x="676" y="420" fill="#2f5fae" font-size="12" text-anchor="end">主 run · 同步 ReAct</text>
+    <text x="44" y="420" fill="#747981" font-size="12">工具协作流程</text>
+    <text x="676" y="420" fill="#2f5fae" font-size="12" text-anchor="end">同步 ReAct</text>
   </g>
 </svg>
