@@ -2,7 +2,7 @@
 
 一个无需构建的静态作品集页面，用于介绍 Reactor、Qt 音乐播放器和 atrain CLI 三个项目。页面中的流程与结构示意用于说明项目，均不等同于可运行的在线演示；atrain CLI 源码正在整理中。
 
-目标地址：[https://759stronger.github.io](https://759stronger.github.io)。当前文档不代表已经发布，需在 GitHub Pages 部署成功并验收后确认。
+在线地址：[https://759stronger.github.io](https://759stronger.github.io)。已于 2026-10-05 完成 GitHub Pages 部署与公网页面访问验收。默认分支为 `main`，发布源为根目录，后续网站提交由 Pages 自动部署。
 
 ## 文件
 
