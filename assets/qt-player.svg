@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 440" role="img" aria-labelledby="title desc">
+  <title id="title">Qt 音乐播放器源码结构示意</title>
+  <desc id="desc">音乐导入后形成歌单，由 Qt 6 的 QMediaPlayer 和 QAudioOutput 负责播放。播放位置联动歌词定位，通过托盘退出时通过 SQLite 保存曲目、收藏与历史数据。此图展示源码结构，不是播放器运行截图。</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#454a52" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker>
+  </defs>
+  <rect width="720" height="440" fill="#f8f7f3"/>
+  <g font-family="Microsoft YaHei, PingFang SC, sans-serif">
+    <rect x="44" y="43" width="4" height="24" rx="2" fill="#2f5fae"/>
+    <text x="61" y="64" fill="#24282e" font-size="25" font-weight="600">Qt 音乐播放器</text>
+    <text x="44" y="94" fill="#747981" font-size="14">媒体组织、播放状态与歌词联动</text>
+    <g fill="#ffffff" stroke="#d8dbe0" stroke-width="1.5">
+      <rect x="44" y="154" width="150" height="80" rx="12"/>
+      <rect x="240" y="154" width="170" height="80" rx="12"/>
+      <rect x="456" y="154" width="220" height="80" rx="12" stroke="#2f5fae"/>
+      <rect x="240" y="300" width="170" height="64" rx="10"/>
+      <rect x="456" y="300" width="220" height="64" rx="10"/>
+    </g>
+    <g fill="none" stroke="#454a52" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)">
+      <path d="M194 194 H233"/>
+      <path d="M410 194 H449"/>
+      <path d="M500 234 V268 H325 V293"/>
+      <path d="M614 234 V293"/>
+    </g>
+    <g fill="#24282e" font-size="18" font-weight="600" text-anchor="middle">
+      <text x="119" y="188">导入音乐</text>
+      <text x="325" y="188">歌单</text>
+      <text x="566" y="188">播放与音频输出</text>
+      <text x="325" y="327">歌词定位</text>
+      <text x="566" y="327" font-size="17">SQLite</text>
+    </g>
+    <g fill="#747981" font-size="13" text-anchor="middle">
+      <text x="119" y="213">媒体文件</text>
+      <text x="325" y="213">列表与当前曲目</text>
+      <text x="566" y="213" font-size="12">QMediaPlayer · QAudioOutput</text>
+      <text x="325" y="349">按播放位置更新</text>
+      <text x="566" y="349">曲目 · 收藏 · 历史</text>
+    </g>
+    <rect x="391" y="257" width="73" height="22" rx="4" fill="#f8f7f3"/>
+    <text x="427" y="273" fill="#2f5fae" font-size="13" text-anchor="middle">position</text>
+    <rect x="615" y="252" width="60" height="22" rx="4" fill="#f8f7f3"/>
+    <text x="644" y="268" fill="#747981" font-size="13" text-anchor="middle">托盘退出</text>
+    <path d="M44 398 H676" stroke="#dedfe2" stroke-width="1"/>
+    <text x="44" y="420" fill="#747981" font-size="12">源码结构示意</text>
+    <text x="676" y="420" fill="#2f5fae" font-size="12" text-anchor="end">Qt 6 · 信号与槽</text>
+  </g>
+</svg>

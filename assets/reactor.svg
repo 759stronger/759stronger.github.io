@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 440" role="img" aria-labelledby="title desc">
+  <title id="title">Reactor HTTP Server 源码架构示意</title>
+  <desc id="desc">监听器将连接交给工作 EventLoop，随后解析 HTTP 请求并写回响应。eventfd 与 timerfd 作为事件循环的辅助事件来源。图示当前 LT 事件触发结构，不代表运行验收结果。</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#454a52" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker>
+  </defs>
+  <rect width="720" height="440" fill="#f8f7f3"/>
+  <g font-family="Microsoft YaHei, PingFang SC, sans-serif">
+    <rect x="44" y="43" width="4" height="24" rx="2" fill="#2f5fae"/>
+    <text x="61" y="64" fill="#24282e" font-size="25" font-weight="600">Reactor HTTP Server</text>
+    <text x="44" y="94" fill="#747981" font-size="14">连接分派、事件循环与 HTTP 请求处理</text>
+    <g fill="#ffffff" stroke="#d8dbe0" stroke-width="1.5">
+      <rect x="44" y="164" width="130" height="80" rx="12"/>
+      <rect x="210" y="164" width="138" height="80" rx="12" stroke="#2f5fae"/>
+      <rect x="384" y="164" width="120" height="80" rx="12"/>
+      <rect x="540" y="164" width="136" height="80" rx="12"/>
+      <rect x="141" y="306" width="136" height="64" rx="10"/>
+      <rect x="305" y="306" width="136" height="64" rx="10"/>
+    </g>
+    <g fill="none" stroke="#454a52" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)">
+      <path d="M174 204 H203"/>
+      <path d="M348 204 H377"/>
+      <path d="M504 204 H533"/>
+      <path d="M209 306 V278 H279 V251"/>
+      <path d="M373 306 V278 H279 V251"/>
+    </g>
+    <g fill="#24282e" font-size="18" font-weight="600" text-anchor="middle">
+      <text x="109" y="197">监听</text>
+      <text x="279" y="197">工作 EventLoop</text>
+      <text x="444" y="197">HTTP 解析</text>
+      <text x="608" y="197">响应写回</text>
+      <text x="209" y="333" font-size="17">eventfd</text>
+      <text x="373" y="333" font-size="17">timerfd</text>
+    </g>
+    <g fill="#747981" font-size="13" text-anchor="middle">
+      <text x="109" y="222">Acceptor</text>
+      <text x="279" y="222">连接事件分发</text>
+      <text x="444" y="222">请求状态机</text>
+      <text x="608" y="222">发送缓冲区</text>
+      <text x="209" y="355">唤醒事件</text>
+      <text x="373" y="355">定时事件</text>
+    </g>
+    <path d="M44 398 H676" stroke="#dedfe2" stroke-width="1"/>
+    <text x="44" y="420" fill="#747981" font-size="12">源码结构示意</text>
+    <text x="676" y="420" fill="#2f5fae" font-size="12" text-anchor="end">LT 事件触发</text>
+  </g>
+</svg>

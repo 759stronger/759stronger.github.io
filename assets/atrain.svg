@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 440" role="img" aria-labelledby="title desc">
+  <title id="title">atrain CLI 同步 ReAct 流程示意</title>
+  <desc id="desc">用户输入送入模型，由模型选择注册工具，工具返回观察结果后再次进入模型并生成回答。主 run 使用同步 ReAct 流程、工具 Schema 与 deque 短期记忆，外围虚线表示步数、连续工具错误和重复调用的早停检查，不表示沙箱或已经完成的审批机制。</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#454a52" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker>
+  </defs>
+  <rect width="720" height="440" fill="#f8f7f3"/>
+  <g font-family="Microsoft YaHei, PingFang SC, sans-serif">
+    <rect x="44" y="43" width="4" height="24" rx="2" fill="#2f5fae"/>
+    <text x="61" y="64" fill="#24282e" font-size="25" font-weight="600">atrain CLI</text>
+    <text x="44" y="94" fill="#747981" font-size="14">模型决策与工具观察的同步循环</text>
+    <rect x="194" y="135" width="502" height="234" rx="16" fill="none" stroke="#bec6d0" stroke-width="1.3" stroke-dasharray="5 6"/>
+    <text x="208" y="124" fill="#747981" font-size="12">早停检查：步数 · 连续错误 · 重复调用</text>
+    <g fill="#ffffff" stroke="#d8dbe0" stroke-width="1.5">
+      <rect x="44" y="159" width="130" height="70" rx="11"/>
+      <rect x="210" y="159" width="132" height="70" rx="11" stroke="#2f5fae"/>
+      <rect x="376" y="159" width="132" height="70" rx="11"/>
+      <rect x="542" y="159" width="134" height="70" rx="11"/>
+      <rect x="376" y="285" width="132" height="64" rx="10" stroke="#2f5fae"/>
+      <rect x="210" y="285" width="132" height="64" rx="10"/>
+    </g>
+    <g fill="none" stroke="#454a52" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)">
+      <path d="M174 194 H203"/>
+      <path d="M342 194 H369"/>
+      <path d="M508 194 H535"/>
+      <path d="M609 229 V257 H442 V278"/>
+      <path d="M376 317 H349"/>
+    </g>
+    <g fill="#24282e" font-size="18" font-weight="600" text-anchor="middle">
+      <text x="109" y="188">用户输入</text>
+      <text x="276" y="188">模型</text>
+      <text x="442" y="188">注册工具</text>
+      <text x="609" y="188">观察结果</text>
+      <text x="442" y="310">再次模型</text>
+      <text x="276" y="310">回答</text>
+    </g>
+    <g fill="#747981" font-size="13" text-anchor="middle">
+      <text x="109" y="212">Prompt</text>
+      <text x="276" y="212">选择下一步</text>
+      <text x="442" y="212">工具 Schema</text>
+      <text x="609" y="212">工具返回</text>
+      <text x="442" y="334" font-size="12">短期记忆 · deque</text>
+      <text x="276" y="334">CLI 输出</text>
+    </g>
+    <rect x="503" y="246" width="75" height="22" rx="4" fill="#f8f7f3"/>
+    <text x="540" y="262" fill="#747981" font-size="12" text-anchor="middle">继续推理</text>
+    <path d="M44 398 H676" stroke="#dedfe2" stroke-width="1"/>
+    <text x="44" y="420" fill="#747981" font-size="12">源码流程示意</text>
+    <text x="676" y="420" fill="#2f5fae" font-size="12" text-anchor="end">主 run · 同步 ReAct</text>
+  </g>
+</svg>

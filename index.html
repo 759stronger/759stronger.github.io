@@ -1,0 +1,515 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>759stronger · C++ 与 Agent 项目实践</title>
+  <style>
+    /* ─── tokens ─────────────────────────────────────────────────────────
+       Six variables. Bind them to the active DESIGN.md and stop.
+       Do not introduce raw hex anywhere else in this file. */
+    :root {
+      --bg:      #f7f6f2;   /* page background — never #fff */
+      --surface: #ffffff;   /* cards, modals, raised areas */
+      --fg:      #202936;   /* primary text — never #000 */
+      --muted:   #626d79;   /* secondary text, captions */
+      --border:  #dce0e3;   /* hairlines, dividers */
+      --accent:  #2f5fae;   /* one accent — used at most 2× per screen */
+
+      /* derived — do not change */
+      --accent-soft: color-mix(in oklch, var(--accent) 14%, transparent);
+      --fg-soft:     color-mix(in oklch, var(--fg) 6%, transparent);
+
+      /* type — display = serif (default), body = sans, mono for numerics */
+      --font-display: 'Iowan Old Style', 'Charter', Georgia, 'Songti SC', 'STSong', 'SimSun', 'Times New Roman', serif;
+      --font-body:    -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', 'PingFang SC', system-ui, sans-serif;
+      --font-mono:    ui-monospace, 'JetBrains Mono', 'SF Mono', Menlo, monospace;
+
+      /* scale — clamp() so it works at 1280, 1440, 1920 without media queries */
+      --fs-h1: clamp(38px, 4.4vw, 62px);
+      --fs-h2: clamp(28px, 3vw, 40px);
+      --fs-h3: 22px;
+      --fs-lead: 19px;
+      --fs-body: 16px;
+      --fs-meta: 13px;
+
+      /* spacing — 8-point grid */
+      --gap-xs: 8px;
+      --gap-sm: 12px;
+      --gap-md: 20px;
+      --gap-lg: 32px;
+      --gap-xl: 56px;
+      --gap-2xl: 96px;
+      --container: 1200px;
+      --gutter: 32px;
+
+      --radius: 10px;
+      --radius-lg: 16px;
+    }
+
+    /* ─── reset & base ──────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; }
+    html { -webkit-text-size-adjust: 100%; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--fg);
+      font-family: var(--font-body);
+      font-size: var(--fs-body);
+      line-height: 1.55;
+      text-rendering: optimizeLegibility;
+      -webkit-font-smoothing: antialiased;
+    }
+    img, svg { display: block; max-width: 100%; }
+    a { color: inherit; text-decoration: none; }
+    button { font: inherit; cursor: pointer; }
+    p { text-wrap: pretty; }
+    h1, h2, h3, h4 { text-wrap: balance; }
+
+    /* ─── layout primitives ─────────────────────────────────────────── */
+    .container {
+      max-width: var(--container);
+      margin-inline: auto;
+      padding-inline: var(--gutter);
+    }
+    .section {
+      padding-block: clamp(48px, 8vw, var(--gap-2xl));
+    }
+    .section + .section { border-top: 1px solid var(--border); }
+    .stack { display: flex; flex-direction: column; }
+    .stack > * + * { margin-top: var(--gap-md); }
+    .row { display: flex; align-items: center; gap: var(--gap-md); }
+    .row-between { display: flex; align-items: center; justify-content: space-between; gap: var(--gap-md); }
+    .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--gap-lg); }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--gap-lg); }
+    .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--gap-md); }
+    .grid-2-1 { display: grid; grid-template-columns: 2fr 1fr; gap: var(--gap-xl); align-items: start; }
+    .grid-1-2 { display: grid; grid-template-columns: 1fr 2fr; gap: var(--gap-xl); align-items: start; }
+    @media (max-width: 920px) {
+      .grid-2, .grid-3, .grid-4, .grid-2-1, .grid-1-2 { grid-template-columns: 1fr; }
+    }
+
+    /* ─── type ──────────────────────────────────────────────────────── */
+    .h1, h1 { font-family: var(--font-display); font-size: var(--fs-h1); line-height: 1.2; letter-spacing: -0.02em; margin: 0; }
+    .h2, h2 { font-family: var(--font-display); font-size: var(--fs-h2); line-height: 1.25; letter-spacing: -0.015em; margin: 0; }
+    .h3, h3 { font-family: var(--font-display); font-size: var(--fs-h3); font-weight: 600; line-height: 1.3; letter-spacing: -0.005em; margin: 0; }
+    .lead   { font-size: var(--fs-lead); line-height: 1.55; color: var(--muted); max-width: 60ch; margin: 0; }
+    .eyebrow {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin: 0 0 var(--gap-md);
+    }
+    .meta { font-family: var(--font-mono); font-size: var(--fs-meta); color: var(--muted); }
+    .num  { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+
+    /* ─── chrome: nav + footer ──────────────────────────────────────── */
+    .topnav {
+      position: sticky; top: 0; z-index: 10;
+      background: color-mix(in oklch, var(--bg) 92%, transparent);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+    .topnav-inner { display: flex; align-items: center; justify-content: space-between; padding-block: 14px; }
+    .topnav .logo { font-family: var(--font-display); font-size: 19px; font-weight: 600; letter-spacing: -0.01em; }
+    .topnav nav { display: flex; gap: var(--gap-lg); }
+    .topnav nav a { font-size: 14px; color: var(--muted); }
+    .topnav nav a:hover { color: var(--fg); }
+    .pagefoot { padding-block: var(--gap-xl); color: var(--muted); font-size: 13px; border-top: 1px solid var(--border); }
+    .pagefoot .row-between { flex-wrap: wrap; gap: var(--gap-md); }
+
+    /* ─── buttons ───────────────────────────────────────────────────── */
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 11px 20px;
+      border-radius: var(--radius);
+      border: 1px solid transparent;
+      font-size: 15px;
+      font-weight: 500;
+      letter-spacing: -0.005em;
+      transition: transform 0.05s ease, background 0.15s ease, border-color 0.15s ease;
+    }
+    .btn:active { transform: translateY(1px); }
+    .btn-primary { background: var(--accent); color: var(--surface); border-color: var(--accent); }
+    .btn-primary:hover { background: color-mix(in oklch, var(--accent) 88%, black); }
+    .btn-secondary { background: transparent; color: var(--fg); border-color: var(--border); }
+    .btn-secondary:hover { border-color: var(--fg); }
+    .btn-ghost { background: transparent; color: var(--fg); border-color: transparent; padding-inline: 8px; }
+    .btn-ghost:hover { color: var(--accent); }
+    .btn-arrow::after { content: '→'; transition: transform 0.15s ease; }
+    .btn-arrow:hover::after { transform: translateX(2px); }
+
+    /* ─── card / surface ────────────────────────────────────────────── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 28px;
+    }
+    .card-flat { background: transparent; border: 0; padding: 0; }
+    .card-rule { background: transparent; border: 0; border-top: 1px solid var(--fg); padding: 24px 0 0; border-radius: 0; }
+
+    /* ─── feature cell (icon + h3 + p) ──────────────────────────────── */
+    .feature .feature-mark {
+      width: 36px; height: 36px;
+      display: grid; place-items: center;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--accent);
+      margin-bottom: var(--gap-md);
+    }
+    .feature .feature-mark svg { width: 18px; height: 18px; }
+    .feature h3 { margin-bottom: 6px; }
+    .feature p  { margin: 0; color: var(--muted); font-size: 15px; }
+
+    /* ─── stat (big number + label) ─────────────────────────────────── */
+    .stat .stat-num {
+      font-family: var(--font-display);
+      font-size: clamp(56px, 8vw, 96px);
+      line-height: 0.95;
+      letter-spacing: -0.04em;
+      color: var(--accent);
+      font-weight: 600;
+    }
+    .stat .stat-label { color: var(--muted); font-size: 14px; margin-top: 8px; max-width: 24ch; }
+    .stat .stat-unit  { font-size: 0.5em; opacity: 0.7; margin-left: 2px; }
+
+    /* ─── quote / testimonial ───────────────────────────────────────── */
+    .quote {
+      font-family: var(--font-display);
+      font-size: clamp(24px, 2.6vw, 32px);
+      line-height: 1.32;
+      letter-spacing: -0.01em;
+      max-width: 28ch;
+    }
+    .quote-author { color: var(--muted); font-size: 14px; margin-top: var(--gap-md); }
+    .quote-mark   {
+      font-family: var(--font-display);
+      font-size: 140px; line-height: 0.7;
+      color: var(--accent); opacity: 0.18;
+      margin-bottom: -28px;
+    }
+
+    /* ─── pill / badge / tag ────────────────────────────────────────── */
+    .pill {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 4px 10px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      border-radius: 999px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    .tag {
+      display: inline-flex; align-items: center;
+      padding: 4px 10px;
+      background: transparent;
+      color: var(--muted);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      font-size: 12px;
+    }
+
+    /* ─── form field ────────────────────────────────────────────────── */
+    .field { display: flex; flex-direction: column; gap: 6px; }
+    .field label { font-size: 13px; color: var(--muted); }
+    .input, .textarea {
+      width: 100%;
+      padding: 11px 14px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      color: var(--fg);
+      font: inherit;
+      font-size: 15px;
+    }
+    .input:focus, .textarea:focus {
+      outline: 2px solid var(--accent-soft);
+      border-color: var(--accent);
+    }
+    .textarea { min-height: 96px; resize: vertical; line-height: 1.55; }
+
+    /* ─── table (data-style, no chrome) ─────────────────────────────── */
+    .ds-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    .ds-table th, .ds-table td { padding: 12px 14px; text-align: left; border-bottom: 1px solid var(--border); }
+    .ds-table th { color: var(--muted); font-weight: 500; font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.04em; text-transform: uppercase; }
+    .ds-table tbody tr:hover { background: var(--fg-soft); }
+    .ds-table .num-col { font-family: var(--font-mono); font-variant-numeric: tabular-nums; text-align: right; }
+
+    /* ─── image placeholder (DS-tinted block, never broken <img>) ──── */
+    .ph-img {
+      background:
+        linear-gradient(135deg, var(--accent-soft), var(--fg-soft)),
+        var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      aspect-ratio: 16 / 10;
+      display: grid; place-items: center;
+      color: var(--muted);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      letter-spacing: 0.04em;
+    }
+    .ph-img.square    { aspect-ratio: 1 / 1; }
+    .ph-img.portrait  { aspect-ratio: 3 / 4; }
+    .ph-img.wide      { aspect-ratio: 16 / 9; }
+
+    /* ─── divider ───────────────────────────────────────────────────── */
+    .rule  { border: 0; border-top: 1px solid var(--border); margin: 0; }
+    .rule-strong { border: 0; border-top: 1px solid var(--fg); margin: 0; }
+
+    /* ─── hero variants used by layouts.md ──────────────────────────── */
+    .hero          { padding-block: clamp(64px, 7vw, 100px); }
+    .hero-center   { text-align: center; max-width: 32ch; margin-inline: auto; }
+    .hero h1       { margin-bottom: var(--gap-md); }
+    .hero .lead    { margin-bottom: var(--gap-lg); }
+    .hero-cta      { display: inline-flex; gap: var(--gap-sm); flex-wrap: wrap; }
+    .hero-center .hero-cta { justify-content: center; }
+    .hero-split    { display: grid; grid-template-columns: 1fr 1fr; gap: var(--gap-xl); align-items: center; }
+    @media (max-width: 920px) { .hero-split { grid-template-columns: 1fr; } }
+
+    /* ─── log row (newsletter, blog list, changelog) ────────────────── */
+    .log-row { display: grid; grid-template-columns: 120px 1fr 100px; gap: var(--gap-lg); padding: 22px 0; border-top: 1px solid var(--border); align-items: baseline; }
+    .log-row .meta { color: var(--muted); }
+    .log-row h3 { font-size: 19px; }
+    .log-row .pull { text-align: right; }
+  </style>
+  <meta name="description" content="759stronger 的项目作品集：Reactor HTTP 服务器、Qt 音乐播放器和开发中的 atrain CLI。介绍实现路径、源码入口与当前进展。" />
+  <meta name="theme-color" content="#f7f6f2" />
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+  <style>
+    html { scroll-behavior: smooth; scroll-padding-top: 100px; }
+    a:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 5px; border-radius: 4px; }
+    a:hover { text-decoration: underline; text-underline-offset: 5px; }
+    .btn:hover, .logo:hover { text-decoration: none; }
+    .skip-link { position: absolute; top: -80px; left: 20px; z-index: 30; padding: 12px 20px; background: var(--surface); border: 1px solid var(--border); }
+    .skip-link:focus { top: 12px; }
+    .topnav .logo { font-family: var(--font-mono); font-size: 17px; }
+    .topnav-inner { gap: 24px; min-height: 72px; }
+    .topnav nav { gap: 28px; }
+    .topnav nav a[aria-label] { color: var(--fg); }
+    .eyebrow { color: var(--muted); }
+    .hero h1 { font-weight: 500; }
+    .hero .lead { font-size: 17px; line-height: 1.8; max-width: 28em; }
+    .hero .meta { display: block; margin-top: 30px; font-family: var(--font-body); font-size: 13px; line-height: 1.8; }
+    figure { margin: 0; }
+    .hero-figure { position: relative; padding: 14px; border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--surface); transform: rotate(-1.5deg); }
+    .hero-figure img { width: 100%; height: auto; border-radius: 8px; }
+    .hero-figure figcaption { margin: 12px 8px 3px; display: flex; justify-content: space-between; gap: 12px; font-size: 11px; font-family: var(--font-mono); color: var(--muted); }
+    .section-heading { display: flex; align-items: end; justify-content: space-between; gap: 32px; margin-bottom: 40px; }
+    .section-heading p { max-width: 29em; color: var(--muted); margin: 0; font-size: 14px; line-height: 1.8; }
+    .project-grid { gap: 24px; }
+    .project-card { display: flex; flex-direction: column; min-width: 0; padding: 0; overflow: hidden; border-radius: 12px; }
+    .project-card figure { padding: 12px; background: var(--bg); border-bottom: 1px solid var(--border); }
+    .project-card figure a { display: block; width: 100%; }
+    .project-card figcaption { margin: 8px 5px 0; font-size: 10px; color: var(--muted); }
+    .project-card img { width: 100%; height: auto; aspect-ratio: 720 / 440; filter: grayscale(1); }
+    .project-content { display: flex; flex-direction: column; flex: 1; padding: 24px; }
+    .project-meta { display: flex; justify-content: space-between; gap: 12px; align-items: center; margin-bottom: 16px; }
+    .project-meta .meta { font-size: 11px; }
+    .project-meta .tag { font-size: 11px; padding: 3px 8px; color: var(--fg); background: var(--fg-soft); border: 0; }
+    .project-content h3 { font-size: 23px; margin-bottom: 12px; }
+    .project-content > p { font-size: 14px; line-height: 1.8; color: var(--muted); margin: 0 0 20px; }
+    .project-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 22px; }
+    .project-tags .tag { font-family: var(--font-mono); font-size: 10px; padding: 3px 8px; }
+    .project-links { display: flex; flex-wrap: wrap; align-items: center; gap: 18px; margin-top: auto; padding-top: 18px; border-top: 1px solid var(--border); font-size: 13px; }
+    .project-links span { color: var(--muted); }
+    .project-links a::after { content: ' ↗'; font-family: var(--font-mono); }
+    .project-links a[href^='#']::after { content: ' →'; }
+    .detail-row { border-top: 1px solid var(--border); }
+    .detail-row:last-child { border-bottom: 1px solid var(--border); }
+    .detail-row > summary { list-style: none; display: grid; grid-template-columns: 95px 1fr 32px; gap: 24px; align-items: center; padding: 26px 0; cursor: pointer; }
+    .detail-row > summary::-webkit-details-marker { display: none; }
+    .detail-row > summary::after { content: '+'; font-size: 25px; text-align: right; font-family: var(--font-mono); font-weight: 300; }
+    .detail-row[open] > summary::after { content: '−'; }
+    .detail-row summary:hover h3 { text-decoration: underline; text-underline-offset: 6px; }
+    .detail-row summary .meta { font-size: 12px; }
+    .detail-row summary h3 { font-size: 22px; font-weight: 500; }
+    .detail-row summary p { margin: 5px 0 0; font-size: 13px; color: var(--muted); }
+    .detail-content { padding: 0 0 30px 119px; }
+    .detail-content .grid-3 { gap: 28px; }
+    .detail-content h4 { margin: 0 0 8px; font-family: var(--font-display); font-size: 17px; }
+    .detail-content p { font-size: 14px; line-height: 1.85; color: var(--muted); margin: 0; }
+    .source-link { display: inline-block; font-family: var(--font-mono); font-size: 12px; margin-top: 12px; overflow-wrap: anywhere; text-decoration: underline; text-underline-offset: 4px; }
+    .progress-note { margin-top: 24px; padding: 18px 20px; background: var(--fg-soft); border-radius: 8px; }
+    .progress-note p + p { margin-top: 7px; }
+    .progress-note strong { color: var(--fg); font-weight: 500; }
+    .focus-list { margin: 0; padding: 0; list-style: none; }
+    .focus-list li { padding: 16px 0; border-top: 1px solid var(--border); display: flex; gap: 20px; align-items: baseline; }
+    .focus-list .meta { font-size: 11px; min-width: 27px; }
+    .focus-list p { margin: 0; font-size: 14px; line-height: 1.8; color: var(--muted); }
+    .focus-list strong { display: block; font-size: 16px; font-weight: 500; color: var(--fg); margin-bottom: 3px; }
+    .focus-copy { max-width: 29em; }
+    .focus-copy .lead { margin-top: 22px; font-size: 16px; line-height: 1.85; }
+    .cta-copy { font-size: 16px; line-height: 1.8; }
+    .pagefoot a { text-decoration: underline; text-underline-offset: 4px; }
+    @media (max-width: 920px) {
+      .hero-split { gap: 40px; }
+      .hero-figure { max-width: 650px; transform: none; }
+      .section-heading { align-items: start; flex-direction: column; gap: 16px; }
+      .project-card { display: grid; grid-template-columns: 0.9fr 1.1fr; }
+      .project-card figure { display: flex; flex-direction: column; justify-content: center; align-items: center; border-bottom: 0; border-right: 1px solid var(--border); }
+      .detail-content .grid-3 { gap: 22px; }
+      .grid-1-2 { gap: 28px; }
+    }
+    @media (max-width: 600px) {
+      :root { --gutter: 20px; }
+      .topnav-inner { flex-wrap: wrap; gap: 12px; min-height: auto; padding-block: 16px; }
+      .topnav nav { gap: 20px; }
+      .topnav nav a { font-size: 12px; }
+      .topnav .logo { font-size: 15px; }
+      .hero { padding-top: 52px; }
+      .hero .lead { font-size: 15px; }
+      .project-card { display: flex; }
+      .project-card figure { border-right: 0; border-bottom: 1px solid var(--border); }
+      .project-content { padding: 22px; }
+      .detail-row > summary { grid-template-columns: 1fr 26px; gap: 12px; padding-block: 22px; }
+      .detail-row summary > .meta { display: none; }
+      .detail-row summary h3 { font-size: 20px; }
+      .detail-row summary p { line-height: 1.7; }
+      .detail-content { padding-left: 0; }
+      .progress-note { padding: 16px; }
+      .hero-figure figcaption { font-size: 10px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after { transition: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#content">跳到正文</a>
+  <header class="topnav" data-od-id="topnav">
+    <div class="container topnav-inner">
+      <a class="logo" href="#top" aria-label="759stronger 首页">759stronger<span aria-hidden="true"> /</span></a>
+      <nav aria-label="主导航">
+        <a href="#projects">项目</a>
+        <a href="#implementation">实现路径</a>
+        <a href="#focus">关于</a>
+        <a href="https://github.com/759stronger" target="_blank" rel="noopener noreferrer" aria-label="759stronger 的 GitHub（新窗口）">GitHub ↗</a>
+      </nav>
+    </div>
+  </header>
+  <main id="content">
+    <section class="section hero" id="top" data-od-id="hero">
+      <div class="container hero-split">
+        <div>
+          <p class="eyebrow">C++ ENGINEERING / AGENT EXPLORATION</p>
+          <h1>从网络服务，<br />到桌面与 Agent。</h1>
+          <p class="lead">我是 759stronger。这里记录三个项目的实现路径：用 C++ 理解连接与交互，用 Python 探索模型与工具的协作。</p>
+          <div class="hero-cta">
+            <a class="btn btn-primary btn-arrow" href="#projects">查看项目</a>
+            <a class="btn btn-secondary" href="#implementation">从代码入口了解</a>
+          </div>
+          <span class="meta">C++ 学习实践 · atrain 个人原型<br />项目进展以实际验证范围为准</span>
+        </div>
+        <figure class="hero-figure">
+          <img src="assets/reactor.svg" width="720" height="440" alt="Reactor 请求从监听进入工作事件循环，完成 HTTP 解析与响应写回；eventfd 唤醒，timerfd 处理定时事件。" fetchpriority="high" />
+          <figcaption><span>01 / REACTOR REQUEST PATH</span><span>源码结构示意</span></figcaption>
+        </figure>
+      </div>
+    </section>
+    <section class="section" id="projects" data-od-id="projects">
+      <div class="container">
+        <div class="section-heading">
+          <div><p class="eyebrow">SELECTED PROJECTS</p><h2>三个项目，三个切入点。</h2></div>
+          <p>网络事件、桌面交互和工具调用。每个项目都提供一条清晰的阅读路径，展开后可查看实现与当前进展。</p>
+        </div>
+        <div class="grid-3 project-grid">
+          <article class="card project-card">
+            <figure><a href="assets/reactor.svg" target="_blank" rel="noopener noreferrer" aria-label="放大项目结构图（新窗口）"><img src="assets/reactor.svg" width="720" height="440" alt="Reactor HTTP 服务器结构示意" loading="lazy" /></a><figcaption>源码结构图 · 点击放大 ↗</figcaption></figure>
+            <div class="project-content">
+              <div class="project-meta"><span class="meta">01 / NETWORK</span><span class="tag">学习实践</span></div>
+              <h3>Reactor HTTP Server</h3>
+              <p>围绕 Linux 事件循环组织 TCP 连接，串起请求解析、路由处理和响应发送，练习网络服务的底层机制。</p>
+              <div class="project-tags"><span class="tag">C++11</span><span class="tag">epoll · LT</span><span class="tag">HTTP</span></div>
+              <div class="project-links"><a href="#reactor-detail">实现路径</a><a href="https://github.com/759stronger/reactor-http-server" target="_blank" rel="noopener noreferrer">GitHub 源码</a></div>
+            </div>
+          </article>
+          <article class="card project-card">
+            <figure><a href="assets/qt-player.svg" target="_blank" rel="noopener noreferrer" aria-label="放大项目结构图（新窗口）"><img src="assets/qt-player.svg" width="720" height="440" alt="Qt 播放器的导入、歌单、音频播放、歌词定位和 SQLite 存储结构示意" loading="lazy" /></a><figcaption>源码结构图 · 点击放大 ↗</figcaption></figure>
+            <div class="project-content">
+              <div class="project-meta"><span class="meta">02 / DESKTOP</span><span class="tag">学习实践</span></div>
+              <h3>Qt 音乐播放器</h3>
+              <p>将本地音乐导入、播放控制、歌词定位和数据保存接成桌面应用，练习信号与槽驱动的状态协调。</p>
+              <div class="project-tags"><span class="tag">C++17</span><span class="tag">Qt 6</span><span class="tag">SQLite</span></div>
+              <div class="project-links"><a href="#qt-detail">实现路径</a><a href="https://github.com/759stronger/qt-music-player" target="_blank" rel="noopener noreferrer">GitHub 源码</a></div>
+            </div>
+          </article>
+          <article class="card project-card">
+            <figure><a href="assets/atrain.svg" target="_blank" rel="noopener noreferrer" aria-label="放大项目结构图（新窗口）"><img src="assets/atrain.svg" width="720" height="440" alt="atrain CLI 的输入、模型决策、工具执行、观察结果与最终回答流程示意" loading="lazy" /></a><figcaption>源码结构图 · 点击放大 ↗</figcaption></figure>
+            <div class="project-content">
+              <div class="project-meta"><span class="meta">03 / AI AGENT</span><span class="tag">开发中</span></div>
+              <h3>atrain CLI</h3>
+              <p>独立编写的终端 Agent 原型。模型选择注册工具，工具结果回到上下文，再由模型继续处理任务。</p>
+              <div class="project-tags"><span class="tag">Python</span><span class="tag">ReAct</span><span class="tag">Tool Schema</span></div>
+              <div class="project-links"><a href="#atrain-detail">实现路径</a><span>源码整理中</span></div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+    <section class="section" id="implementation" data-od-id="implementation">
+      <div class="container">
+        <div class="section-heading">
+          <div><p class="eyebrow">READ THE IMPLEMENTATION</p><h2>从一条路径开始读代码。</h2></div>
+          <p>点击项目展开。先沿数据流理解核心模块，再看生命周期、错误处理与下一步验证。</p>
+        </div>
+        <details class="detail-row" id="reactor-detail">
+          <summary><span class="meta">NETWORK</span><div><h3>一个 HTTP 请求如何走完服务端？</h3><p>监听 → 工作事件循环 → 请求解析 → 响应写回</p></div></summary>
+          <div class="detail-content">
+            <div class="grid-3">
+              <div><h4>连接与循环</h4><p>Acceptor 接收连接，工作 EventLoop 处理就绪事件；eventfd 负责跨线程唤醒，timerfd 为定时任务提供事件入口。</p><a class="source-link" href="https://github.com/759stronger/reactor-http-server/blob/c143a984db04a87d764f511a8e433592c451555a/include/reactor/server.hpp" target="_blank" rel="noopener noreferrer">include/reactor/server.hpp ↗</a></div>
+              <div><h4>HTTP 请求处理</h4><p>请求数据进入缓冲区，解析器逐步识别请求行、头部与正文。完成解析后进入路由回调，构造并发送响应。</p><a class="source-link" href="https://github.com/759stronger/reactor-http-server" target="_blank" rel="noopener noreferrer">浏览项目目录 ↗</a></div>
+              <div><h4>值得深入的地方</h4><p>非阻塞读写、连接释放、线程间任务投递，以及超时刷新。当前使用 LT 触发，后续需结合测试验证边界行为。</p></div>
+            </div>
+            <div class="progress-note"><p><strong>当前验证：</strong>构建目标与路径检查通过；完整 Linux 编译和服务运行尚未验证。</p><p><strong>下一步：</strong>完成 Linux 构建、基础 HTTP 回归与连接压力测试，再补充可复现的结果。</p></div>
+          </div>
+        </details>
+        <details class="detail-row" id="qt-detail">
+          <summary><span class="meta">DESKTOP</span><div><h3>一首歌如何从导入走到数据保存？</h3><p>导入 → 歌单 → 播放 → 歌词联动 → 本地保存</p></div></summary>
+          <div class="detail-content">
+            <div class="grid-3">
+              <div><h4>播放与交互</h4><p>Qt Widgets 承载界面，QMediaPlayer 与 QAudioOutput 完成媒体播放与音频输出。信号与槽连接按钮、曲目和播放状态。</p><a class="source-link" href="https://github.com/759stronger/qt-music-player/blob/4cedab41614090d4a908aec8a0819c9062cf6354/src/app/video_to_mp3_music.cpp" target="_blank" rel="noopener noreferrer">src/app/video_to_mp3_music.cpp ↗</a></div>
+              <div><h4>歌词与媒体组织</h4><p>解析 LRC 时间标记，按播放位置定位歌词；本地歌曲、收藏与历史列表组织媒体数据和用户操作。</p><a class="source-link" href="https://github.com/759stronger/qt-music-player" target="_blank" rel="noopener noreferrer">浏览项目目录 ↗</a></div>
+              <div><h4>持久化与加载</h4><p>SQLite 保存曲目元数据、收藏与历史记录。可以从托盘退出的保存路径，追踪到下次启动的数据加载路径。</p></div>
+            </div>
+            <div class="progress-note"><p><strong>当前验证：</strong>此前 Release 编译、链接通过；尚未启动播放器完成真实播放与歌词验收。</p><p><strong>下一步：</strong>验证音频输出、切歌、歌词对齐，以及托盘退出后的曲目与列表恢复。</p></div>
+          </div>
+        </details>
+        <details class="detail-row" id="atrain-detail">
+          <summary><span class="meta">AI AGENT</span><div><h3>模型怎样把一次工具调用接回回答？</h3><p>输入 → 模型决策 → 工具执行 → 观察结果 → 继续处理</p></div></summary>
+          <div class="detail-content">
+            <div class="grid-3">
+              <div><h4>模型与工具契约</h4><p>BaseLLM 对接模型调用，ToolRegistry 汇集工具定义。Pydantic Schema 描述输入，让模型按约定选择工具并传入参数。</p><span class="source-link">源码尚未公开</span></div>
+              <div><h4>同步 ReAct 循环</h4><p>主 run 使用同步调用：处理输入、解析工具请求、执行工具，再把观察结果放回上下文。deque 保存短期消息记忆。</p></div>
+              <div><h4>原型的边界</h4><p>源码包含基础文件、命令和网络工具，以及步数、连续错误与重复调用的早停检查。工具安全仍需完善，真正的隔离沙箱与操作审批尚未实现。</p></div>
+            </div>
+            <div class="progress-note"><p><strong>当前验证：</strong>源文件语法解析检查通过；尚未完成安装入口、真实 API 调用与端到端运行验收。</p><p><strong>下一步：</strong>先收敛可运行闭环，再完善工具执行确认、异常处理与回归测试。</p></div>
+          </div>
+        </details>
+      </div>
+    </section>
+    <section class="section" id="focus" data-od-id="focus">
+      <div class="container grid-1-2">
+        <div class="focus-copy"><p class="eyebrow">CURRENT FOCUS</p><h2>少做几个，<br />把实现讲清楚。</h2><p class="lead">接下来围绕这三个项目继续深入：补足运行证据，理解关键取舍，让代码、文档和演示保持一致。</p></div>
+        <ul class="focus-list">
+          <li><span class="meta">01</span><p><strong>网络服务：把连接生命周期跑完整</strong>关注事件循环、非阻塞 I/O、线程协作和连接回收，用真实请求验证实现。</p></li>
+          <li><span class="meta">02</span><p><strong>桌面应用：让状态变化可预测</strong>关注交互反馈、媒体状态、歌词定位和持久化，补齐实际播放场景。</p></li>
+          <li><span class="meta">03</span><p><strong>Agent：先做可解释的最小闭环</strong>关注模型与工具的契约、上下文管理和失败处理，优先完善基础执行流程。</p></li>
+        </ul>
+      </div>
+    </section>
+    <section class="section" data-od-id="contact" style="text-align: center;">
+      <div class="container" style="max-width: 650px;">
+        <p class="eyebrow">CODE &amp; PROGRESS</p><h2>继续在代码里见。</h2><p class="lead cta-copy" style="margin: 18px auto 28px;">公开项目与后续更新，统一放在 GitHub。</p><a class="btn btn-primary btn-arrow" href="https://github.com/759stronger" target="_blank" rel="noopener noreferrer">访问 759stronger 的 GitHub</a>
+      </div>
+    </section>
+  </main>
+  <footer class="pagefoot" data-od-id="footer"><div class="container row-between"><span>© <span class="num">2026</span> 759stronger · 项目实践记录</span><span>结构图为源码示意 · <a href="https://github.com/759stronger" target="_blank" rel="noopener noreferrer">GitHub</a></span></div></footer>
+</body>
+</html>

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title desc">
+  <title id="title">个人工程作品集图标</title>
+  <desc id="desc">米白圆角底色上的终端提示符与蓝色连接节点。</desc>
+  <rect x="2" y="2" width="60" height="60" rx="15" fill="#f8f7f3"/>
+  <rect x="12" y="15" width="40" height="34" rx="7" fill="#ffffff" stroke="#454a52" stroke-width="2.5"/>
+  <path d="M21 25 L28 32 L21 39 M33 39 H42" fill="none" stroke="#24282e" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="49" cy="16" r="6" fill="#2f5fae" stroke="#f8f7f3" stroke-width="2"/>
+</svg>
